@@ -391,13 +391,14 @@ function renderToday() {
 
     const subEl = document.createElement('div');
     subEl.className = 'subject-accordion glass rounded-xl border border-slate-800/80 shadow-md transform transition-all overflow-hidden';
+    subEl.setAttribute('data-sub-id', subId);
     
     let html = `
       <div class="w-full flex items-center justify-between p-5 bg-slate-800/20 hover:bg-slate-800/40 transition-colors cursor-pointer group" onclick="toggleSubject('${subId}')">
         <div class="flex items-center gap-4">
           <div class="w-3 h-8 rounded-full shadow-lg" style="background-color: ${subject.color}"></div>
           <h2 class="text-xl font-bold text-white tracking-wide">${subject.name}</h2>
-          <span class="bg-slate-800 text-slate-300 text-sm font-semibold px-2.5 py-0.5 rounded-lg">${completedInGroup}/${topics.length}</span>
+          <span class="bg-slate-800 text-slate-300 text-sm font-semibold px-2.5 py-0.5 rounded-lg fraction-text">${completedInGroup}/${topics.length}</span>
           <button class="ml-2 text-xs font-bold bg-primary/20 text-primary hover:bg-primary/40 px-2 py-1 rounded hidden group-hover:block" onclick="event.stopPropagation(); completeSubjectToday('${subId}')">Complete All</button>
         </div>
         <i data-lucide="chevron-down" id="sub-icon-${subId}" class="w-6 h-6 text-slate-400 accordion-icon ${isExpanded ? 'rotated' : ''}"></i>
@@ -435,10 +436,62 @@ function renderToday() {
       const topic = state.topics.find(t => t.id === taskId);
       if (topic) {
         handleTaskCompletion(topic);
-        renderToday();
+        
+        // Targeted DOM updates to avoid screen flicker instead of calling renderToday()
+        const btn = card.querySelector('.checkbox-btn');
+        const textWrapper = card.querySelector('.flex-1');
+        
+        if (topic.completed) {
+           btn.classList.remove('border-slate-500', 'hover:border-primary', 'text-transparent');
+           btn.classList.add('bg-primary', 'border-primary', 'text-white');
+           textWrapper.classList.add('opacity-50', 'line-through', 'text-slate-400');
+           textWrapper.classList.remove('text-slate-200');
+        } else {
+           btn.classList.add('border-slate-500', 'hover:border-primary', 'text-transparent');
+           btn.classList.remove('bg-primary', 'border-primary', 'text-white');
+           textWrapper.classList.remove('opacity-50', 'line-through', 'text-slate-400');
+           textWrapper.classList.add('text-slate-200');
+        }
+        updateDashboardStats();
       }
     });
   });
+}
+
+function updateDashboardStats() {
+  const currentDay = getDaysSinceStart();
+  const todayTopics = state.topics.filter(t => {
+    if (!t.completed && t.plannedDay <= currentDay) return true;
+    if (t.completed && t.plannedDay === currentDay) return true;
+    return false;
+  });
+
+  const totalCompleted = state.topics.filter(t => t.completed).length;
+  const totalTopics = state.topics.length || 1;
+  const weeklyPercent = Math.round((totalCompleted / totalTopics) * 100);
+  document.getElementById('sidebar-percent').textContent = `${weeklyPercent}%`;
+  document.getElementById('sidebar-progress-bar').style.width = `${weeklyPercent}%`;
+  
+  const focusScore = document.getElementById('focus-score-sidebar');
+  if(focusScore) focusScore.textContent = `${weeklyPercent}% FS`;
+
+  const statsCompleted = todayTopics.filter(t => t.completed).length;
+  const statsTotal = todayTopics.length;
+  document.getElementById('progress-completed').textContent = statsCompleted;
+  
+  const todayProgress = statsTotal === 0 ? 0 : Math.round((statsCompleted / statsTotal) * 100);
+  document.getElementById('progress-bar').style.width = `${todayProgress}%`;
+
+  document.querySelectorAll('.subject-accordion').forEach(accordion => {
+    const subId = accordion.getAttribute('data-sub-id');
+    if(!subId) return;
+    const topicsInGrp = state.topics.filter(t => t.subjectId === subId && ((!t.completed && t.plannedDay <= currentDay) || (t.completed && t.plannedDay === currentDay)));
+    const compInGrp = topicsInGrp.filter(t => t.completed).length;
+    const fractionSpan = accordion.querySelector('.fraction-text');
+    if(fractionSpan) fractionSpan.textContent = `${compInGrp}/${topicsInGrp.length}`;
+  });
+  
+  // Re-check empty state if needed. Though if all done, they shouldn't disappear dynamically based on this requirement.
 }
 
 function renderWeekly() {
