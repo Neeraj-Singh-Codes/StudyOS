@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyOS - Weekly Roadmap Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#0b1120] text-slate-200 font-sans overflow-hidden min-h-screen flex selection:bg-primary selection:text-white">
+
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <aside class="glass w-72 h-screen border-r border-slate-800/80 flex flex-col p-6 z-10 shrink-0 backdrop-blur-2xl bg-surface/40 overflow-y-auto">
+      <div class="flex items-center gap-3 mb-6 text-white font-bold text-2xl tracking-tight">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20">
+          <i data-lucide="brain-circuit" class="text-white w-6 h-6"></i>
+        </div>
+        <span>StudyOS</span>
+      </div>
+      
+      <div class="mb-4 flex items-center justify-center gap-2 text-orange-400 font-bold bg-orange-400/10 border border-orange-400/20 shadow-inner px-4 py-2.5 rounded-xl">
+        <i data-lucide="flame" class="w-5 h-5"></i>
+        <span id="streak-display">0 Day Streak</span>
+      </div>
+
+      <div class="mb-6 relative">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+        <input type="text" id="global-search" placeholder="Search topics..." class="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-primary transition-all">
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        <button id="nav-today" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-primary/10 text-primary font-semibold tracking-wide transition-all group">
+          <i data-lucide="target" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> Today's Focus
+        </button>
+        <button id="nav-weekly" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 font-semibold tracking-wide transition-all group">
+          <i data-lucide="map" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> Weekly Plan
+        </button>
+        <button id="nav-review" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 font-semibold tracking-wide transition-all group">
+          <i data-lucide="calendar-check" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> Sunday Review
+        </button>
+        <button id="nav-history" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 font-semibold tracking-wide transition-all group">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> History & Stats
+        </button>
+        <button id="nav-import" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 font-semibold tracking-wide transition-all group">
+          <i data-lucide="import" class="w-4 h-4 group-hover:scale-110 transition-transform"></i> Import Roadmap
+        </button>
+      </nav>
+
+      <div class="mt-auto pt-6 border-t border-slate-800/80 glass-panel rounded-xl p-5">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 flex justify-between">
+          Weekly Completion <span id="focus-score-sidebar" class="text-primary">0% FS</span>
+        </div>
+        <div class="flex items-end gap-2 mb-3">
+          <span class="text-3xl font-extrabold text-white tracking-tight" id="sidebar-percent">0%</span>
+        </div>
+        <div class="w-full bg-slate-900/80 h-2.5 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+          <div id="sidebar-progress-bar" class="h-full bg-gradient-to-r from-primary to-purple-500 w-0 transition-all duration-1000 ease-out"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 h-screen overflow-y-auto p-10 relative z-10 flex flex-col gap-10">
+      
+      <!-- TODAY VIEW -->
+      <div id="view-today" class="view-content flex flex-col gap-8 w-full max-w-4xl mx-auto pb-20">
+        <header class="flex flex-col gap-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <h1 class="text-5xl font-extrabold text-white tracking-tight">Today's Focus</h1>
+                <span id="current-day-badge" class="bg-primary/20 border border-primary/30 text-primary px-3 py-1 rounded-lg font-bold font-mono text-sm shadow-sm">Day 1</span>
+              </div>
+              <p class="text-lg text-slate-400 font-medium" id="daily-target-text">0 Topics Today</p>
+            </div>
+            <button id="start-study-btn" class="bg-white text-slate-900 hover:bg-slate-200 px-8 py-4 rounded-2xl font-bold tracking-wide flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-white/10 text-lg">
+              <i data-lucide="play" class="w-6 h-6 fill-slate-900"></i> Start Studying
+            </button>
+          </div>
+          <div id="carry-forward-banner" class="hidden items-center gap-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 px-5 py-3 rounded-xl font-semibold shadow-inner">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <span id="carry-forward-text">⚠ 0 Topics Carried Forward</span>
+          </div>
+          <div class="glass p-6 rounded-2xl border border-slate-800/80 shadow-lg relative overflow-hidden">
+            <div class="flex justify-between items-end mb-3 relative z-10">
+              <span class="text-slate-400 font-semibold uppercase tracking-wider text-sm">Progress</span>
+              <span class="text-xl font-bold text-white"><span id="progress-completed" class="text-primary">0</span> <span class="text-slate-500 mx-1">/</span> <span id="progress-total">0</span> Completed</span>
+            </div>
+            <div class="w-full bg-slate-900/80 h-3 rounded-full overflow-hidden border border-slate-700/50 relative z-10">
+              <div id="progress-bar" class="h-full bg-primary w-0 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+            </div>
+          </div>
+        </header>
+
+        <div class="glass p-5 rounded-2xl border border-slate-800/50">
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">Daily Notes</h3>
+          <textarea id="daily-notes-input" class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-primary placeholder-slate-600 resize-none h-20" placeholder="Jot down reflections or scratchpad..."></textarea>
+        </div>
+
+        <div id="today-subjects-container" class="space-y-4"></div>
+        <div id="today-empty-state" class="hidden flex-col items-center justify-center p-16 glass rounded-3xl border border-slate-800/50">
+          <h2 class="text-3xl font-extrabold text-white mb-3">You're all caught up!</h2>
+          <p class="text-slate-400">No topics pending for today. Enjoy your break!</p>
+        </div>
+      </div>
+
+      <!-- SEARCH RESULTS VIEW -->
+      <div id="view-search" class="view-content hidden flex-col gap-6 w-full max-w-4xl mx-auto h-full pb-20">
+        <h1 class="text-4xl font-extrabold text-white">Search Results</h1>
+        <div id="search-results-container" class="space-y-3 mt-4"></div>
+      </div>
+
+      <!-- SUNDAY REVIEW VIEW -->
+      <div id="view-review" class="view-content hidden flex-col gap-6 w-full max-w-4xl mx-auto h-full pb-20">
+        <header>
+          <h1 class="text-5xl font-extrabold text-white tracking-tight mb-2 flex items-center gap-4"><i data-lucide="award" class="text-primary w-10 h-10"></i> Sunday Review</h1>
+          <p class="text-lg text-slate-400">Your performance blueprint for the week.</p>
+        </header>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="review-stats"></div>
+        <div class="glass p-6 rounded-2xl border border-slate-800/80 mt-4">
+          <h3 class="text-xl font-bold text-white mb-4">Smart Subject Insights</h3>
+          <div id="review-insights" class="space-y-3 text-slate-300 font-medium leading-relaxed"></div>
+        </div>
+        <div class="glass p-6 rounded-2xl border border-slate-800/80">
+          <h3 class="text-xl font-bold text-white mb-4">Missed Topics Analytics</h3>
+          <div id="review-missed" class="space-y-2"></div>
+        </div>
+        <div class="glass p-6 rounded-2xl border border-slate-800/80 flex flex-col">
+          <h3 class="text-xl font-bold text-white mb-4">Week Reflections</h3>
+          <div id="review-daily-notes" class="space-y-4 text-sm text-slate-300"></div>
+        </div>
+        <div class="mt-8 flex justify-end">
+          <button id="start-new-week-btn" class="bg-primary hover:bg-primaryHover text-white px-8 py-4 rounded-xl font-bold tracking-wide flex items-center gap-3 transition-all shadow-lg">
+            <i data-lucide="archive" class="w-5 h-5"></i> Start New Week
+          </button>
+        </div>
+      </div>
+
+      <!-- HISTORY & STATS VIEW -->
+      <div id="view-history" class="view-content hidden flex-col gap-6 w-full max-w-4xl mx-auto h-full pb-20">
+        <header class="flex justify-between items-end">
+          <div>
+            <h1 class="text-4xl font-extrabold text-white mb-2">History & Stats</h1>
+            <p class="text-lg text-slate-400">Motivation through data.</p>
+          </div>
+          <div class="flex gap-3">
+            <button id="backup-export" class="text-sm border border-slate-700 hover:bg-slate-800 px-4 py-2 rounded-lg text-slate-300 flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Export Backup</button>
+            <button id="backup-import" class="text-sm border border-slate-700 hover:bg-slate-800 px-4 py-2 rounded-lg text-slate-300 flex items-center gap-2" onclick="document.getElementById('backup-file-input').click()"><i data-lucide="upload" class="w-4 h-4"></i> Restore</button>
+            <input type="file" id="backup-file-input" accept=".json" class="hidden">
+          </div>
+        </header>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4" id="stats-container"></div>
+        
+        <h3 class="text-2xl font-bold text-white mt-8 mb-2">Past Weeks</h3>
+        <div id="history-container" class="space-y-4"></div>
+      </div>
+
+      <!-- WEEKLY ROADMAP VIEW -->
+      <div id="view-weekly" class="view-content hidden flex-col gap-6 w-full max-w-5xl mx-auto h-full pb-20">
+        <header><h1 class="text-4xl font-extrabold text-white mb-2">Weekly Plan</h1></header>
+        <div id="weekly-days-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4"></div>
+      </div>
+
+      <!-- IMPORT VIEW -->
+      <div id="view-import" class="view-content hidden flex-col gap-6 w-full max-w-4xl mx-auto h-full pb-20">
+        <header><h1 class="text-4xl font-extrabold text-white mb-2">Roadmap Import</h1></header>
+        <div class="glass flex-1 rounded-3xl border border-slate-800/80 p-1 flex flex-col shadow-2xl">
+          <textarea id="import-textarea" class="flex-1 w-full bg-slate-900/50 rounded-[22px] p-8 text-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none h-[400px]"></textarea>
+          <div class="p-4 bg-surface/80 rounded-b-[22px] border-t border-slate-800/80 flex justify-between items-center">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Start Date</label>
+              <input type="date" id="import-start-date" class="bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-slate-300 text-sm">
+            </div>
+            <button id="import-preview-btn" class="bg-primary hover:bg-primaryHover text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg">Preview Import</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- UI MODALS & OVERLAYS -->
+
+    <!-- Quick Capture Floating Button -->
+    <button id="quick-capture-fab" class="fixed bottom-8 right-8 w-14 h-14 bg-primary hover:bg-primaryHover text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-40">
+      <i data-lucide="plus" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Quick Capture Modal -->
+    <div id="qc-modal" class="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity">
+      <div class="bg-surface p-6 rounded-2xl w-full max-w-md border border-slate-700/50" id="qc-content">
+        <h3 class="text-xl font-bold text-white mb-4">Quick Capture Topic</h3>
+        <input type="text" id="qc-subject" placeholder="Subject (e.g. Design)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 mb-3 text-white focus:outline-none focus:border-primary">
+        <input type="text" id="qc-title" placeholder="Topic name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 mb-4 text-white focus:outline-none focus:border-primary">
+        <div class="flex justify-end gap-3">
+          <button id="qc-cancel" class="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+          <button id="qc-save" class="px-5 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg font-semibold">Save Topic</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import Preview Modal -->
+    <div id="import-preview-modal" class="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity">
+      <div class="bg-surface p-6 rounded-2xl w-full max-w-lg border border-slate-700/50" id="import-preview-content">
+        <h3 class="text-2xl font-bold text-white mb-4">Confirm Import</h3>
+        <div id="import-preview-stats" class="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2"></div>
+        <div class="flex justify-end gap-3">
+          <button id="import-preview-cancel" class="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+          <button id="import-preview-confirm" class="px-6 py-2 bg-primary hover:bg-primaryHover text-white rounded-lg font-bold">Import Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Study Mode -->
+    <div id="study-mode-overlay" class="fixed inset-0 bg-[#0b1120] z-50 flex flex-col hidden opacity-0 transition-opacity duration-300">
+      <header class="p-6 flex justify-between items-center border-b border-slate-800/50">
+        <div class="flex items-center gap-3 font-bold text-slate-400 uppercase tracking-widest text-sm">
+          <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div> Study Mode
+        </div>
+        <button id="close-study-btn" class="text-slate-500 hover:text-white bg-slate-800/50 hover:bg-slate-700 p-2 rounded-full transition-colors">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </header>
+      <div class="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-3xl mx-auto">
+        <div class="text-slate-500 font-bold mb-4 tracking-widest uppercase text-sm" id="study-subject-name">Subject</div>
+        <h2 class="text-5xl md:text-6xl font-extrabold text-white text-center leading-tight mb-16" id="study-topic-title">Title</h2>
+        <div class="w-full flex flex-col gap-4 max-w-md">
+          <button id="study-complete-btn" class="w-full bg-primary hover:bg-primaryHover text-white px-8 py-5 rounded-2xl font-bold text-xl tracking-wide flex items-center justify-center gap-3 transition-all hover:scale-105">
+            <i data-lucide="check-circle" class="w-6 h-6"></i> Mark Complete
+          </button>
+          <div class="grid grid-cols-2 gap-4">
+            <button id="study-skip-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-4 rounded-xl font-semibold flex flex-center gap-2"><i data-lucide="skip-forward" class="w-5 h-5"></i> Skip</button>
+            <button id="study-notes-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-4 rounded-xl font-semibold flex flex-center gap-2"><i data-lucide="file-text" class="w-5 h-5"></i> Notes</button>
+          </div>
+        </div>
+        <div class="mt-12 text-slate-500 font-medium text-sm"><span id="study-progress-text">Topic 1 of 5</span></div>
+      </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notes-modal" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity">
+      <div class="bg-surface border border-slate-700/50 w-full max-w-2xl rounded-3xl p-6" id="notes-modal-content">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-white flex gap-2"><i data-lucide="file-text" class="text-primary w-5 h-5"></i> Notes</h3>
+          <button id="close-notes-btn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <h4 class="text-slate-300 font-medium mb-3" id="notes-topic-title">Title</h4>
+        <textarea id="notes-textarea" class="w-full h-64 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 text-sm focus:outline-none focus:border-primary resize-none"></textarea>
+        <div class="mt-4 flex justify-end">
+          <button id="save-notes-btn" class="bg-primary hover:bg-primaryHover text-white px-6 py-2.5 rounded-xl font-semibold">Save Notes</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+    <style>
+      .view-content { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+      .accordion-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; overflow: hidden; max-height: 0; opacity: 0; }
+      .accordion-content.expanded { max-height: 2000px; opacity: 1; }
+      .accordion-icon { transition: transform 0.3s ease; }
+      .accordion-icon.rotated { transform: rotate(180deg); }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+  </body>
+</html>
