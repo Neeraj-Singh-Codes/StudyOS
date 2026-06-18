@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudyOS - Weekly Roadmap Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-[#0b1120] text-slate-200 font-sans overflow-hidden min-h-screen flex selection:bg-primary selection:text-white">
+  <body class="bg-background text-textMain font-sans overflow-hidden min-h-screen flex selection:bg-primary selection:text-surface">
 
     <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
     <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -166,7 +166,17 @@
       <div id="view-import" class="view-content hidden flex-col gap-6 w-full max-w-4xl mx-auto h-full pb-20">
         <header><h1 class="text-4xl font-extrabold text-white mb-2">Roadmap Import</h1></header>
         <div class="glass flex-1 rounded-3xl border border-slate-800/80 p-1 flex flex-col shadow-2xl">
-          <textarea id="import-textarea" class="flex-1 w-full bg-slate-900/50 rounded-[22px] p-8 text-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none h-[400px]"></textarea>
+          <textarea id="import-textarea" class="flex-1 w-full bg-slate-900/50 rounded-[22px] p-8 text-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none h-[400px]" placeholder='{
+  "days": [
+    {
+      "day": 1,
+      "mysql": [
+        "What is DBMS and RDBMS",
+        "Install and Setup MySQL"
+      ]
+    }
+  ]
+}'></textarea>
           <div class="p-4 bg-surface/80 rounded-b-[22px] border-t border-slate-800/80 flex justify-between items-center">
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Start Date</label>
@@ -212,8 +222,8 @@
     </div>
 
     <!-- Study Mode -->
-    <div id="study-mode-overlay" class="fixed inset-0 bg-[#0b1120] z-50 flex flex-col hidden opacity-0 transition-opacity duration-300">
-      <header class="p-6 flex justify-between items-center border-b border-slate-800/50">
+    <div id="study-mode-overlay" class="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex flex-col hidden opacity-0 transition-opacity duration-300">
+      <header class="p-6 flex justify-between items-center border-b border-primary/20">
         <div class="flex items-center gap-3 font-bold text-slate-400 uppercase tracking-widest text-sm">
           <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div> Study Mode
         </div>
@@ -254,15 +264,14 @@
 
     <script type="module" src="/src/main.js"></script>
     <style>
-      .view-content { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-      .accordion-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; overflow: hidden; max-height: 0; opacity: 0; }
+      .accordion-content { transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; max-height: 0; opacity: 0; }
       .accordion-content.expanded { max-height: 2000px; opacity: 1; }
       .accordion-icon { transition: transform 0.3s ease; }
       .accordion-icon.rotated { transform: rotate(180deg); }
       ::-webkit-scrollbar { width: 8px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background: #141d2b; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
     </style>
   </body>
 </html>

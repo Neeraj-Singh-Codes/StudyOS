@@ -187,47 +187,55 @@ function getDaysSinceStart() {
 function showImportPreview() {
   const text = document.getElementById('import-textarea').value;
   const startDateStr = document.getElementById('import-start-date').value;
-  if (!text.trim()) return alert("Please paste a roadmap.");
+  if (!text.trim()) return alert("Please paste a roadmap in JSON format.");
 
-  const lines = text.split('\n');
+  let parsedJson;
+  try {
+    parsedJson = JSON.parse(text);
+  } catch (e) {
+    return alert("Invalid JSON format. Please provide the syllabus in the correct JSON format.");
+  }
+
+  if (!parsedJson.days || !Array.isArray(parsedJson.days)) {
+    return alert("Invalid JSON format. Must contain a 'days' array.");
+  }
+
   const newTopics = [];
-  let currentSubject = null;
-  let currentDay = 1;
   const colors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4'];
   const subjectsMap = {};
 
-  lines.forEach(line => {
-    line = line.trim();
-    if (!line) return;
+  parsedJson.days.forEach(dayObj => {
+    const day = dayObj.day;
+    if (typeof day !== 'number') return;
+    
+    Object.keys(dayObj).forEach(key => {
+      if (key === 'day') return;
+      
+      const subName = key.toUpperCase() === key ? key : key.split('_').map(word => {
+        if (word.toUpperCase() === 'DSA' || word.toUpperCase() === 'MYSQL') return word.toUpperCase();
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(' ');
 
-    const dayMatch = line.match(/^Day\s+(\d+)/i);
-    if (dayMatch) { currentDay = parseInt(dayMatch[1]); return; }
-
-    const topicMatch = line.match(/^[-*•]\s+(.*)$/) || line.match(/^\[.*\]\s+(.*)$/) || line.match(/^☐\s+(.*)$/) || line.match(/^✓\s+(.*)$/);
-    if (topicMatch && currentSubject) {
-      newTopics.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        subjectId: currentSubject.id,
-        title: topicMatch[1].trim(),
-        plannedDay: currentDay,
-        completed: false,
-        notes: '',
-        carryForwardTimes: 0
-      });
-      return;
-    }
-
-    if (!line.includes('*') && !line.includes('-') && line.length < 40) {
-      let subName = line;
-      if (subName.toLowerCase().includes('javascript revision') || subName.toLowerCase() === 'backend') {
-        subName = 'Backend Engineering';
-      }
       const subId = subName.toLowerCase().replace(/[^a-z0-9]/g, '-');
       if (!subjectsMap[subId]) {
         subjectsMap[subId] = { id: subId, name: subName, color: colors[Object.keys(subjectsMap).length % colors.length] };
       }
-      currentSubject = subjectsMap[subId];
-    }
+      
+      const topicsList = dayObj[key];
+      if (Array.isArray(topicsList)) {
+        topicsList.forEach(topicStr => {
+          newTopics.push({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            subjectId: subId,
+            title: topicStr,
+            plannedDay: day,
+            completed: false,
+            notes: '',
+            carryForwardTimes: 0
+          });
+        });
+      }
+    });
   });
 
   const subStats = {};
@@ -605,19 +613,52 @@ function renderReview() {
 function renderHistory() {
   const container = document.getElementById('history-container');
   container.innerHTML = '';
-  state.history.reverse().forEach(h => {
+  
+  state.history.slice().reverse().forEach((h, index) => {
+    let topicsHtml = '';
+    
+    if (h.topics && h.topics.length > 0) {
+       const completedTopics = h.topics.filter(t => t.completed);
+       if (completedTopics.length > 0) {
+         topicsHtml = `
+         <div class="mt-4 pt-4 border-t border-slate-700/50 hidden" id="history-topics-${index}">
+           <h4 class="text-slate-300 font-bold mb-3 text-sm uppercase tracking-wider">Completed Topics</h4>
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+             ${completedTopics.map(t => {
+               const subjectsToUse = h.subjects || state.subjects;
+               const sub = subjectsToUse?.find(s => s.id === t.subjectId);
+               const subName = sub ? sub.name : 'Unknown Subject';
+               return `
+                 <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                   <div class="text-xs text-slate-500 font-bold mb-1">${subName}</div>
+                   <div class="text-slate-200 text-sm">${t.title}</div>
+                 </div>
+               `;
+             }).join('')}
+           </div>
+         </div>`;
+       }
+    }
+
     container.innerHTML += `
-      <div class="glass p-6 rounded-2xl border border-slate-800 flex justify-between items-center">
-        <div>
-          <div class="text-2xl font-bold text-white">Week of ${h.startDate}</div>
-          <div class="text-slate-400 text-sm mt-1">${h.totalCompleted} Topics Completed</div>
+      <div class="glass p-6 rounded-2xl border border-slate-800 transition-all">
+        <div class="flex justify-between items-center cursor-pointer group" onclick="document.getElementById('history-topics-${index}')?.classList.toggle('hidden')">
+          <div>
+            <div class="text-2xl font-bold text-white group-hover:text-primary transition-colors">Week of ${h.startDate}</div>
+            <div class="text-slate-400 text-sm mt-1">${h.totalCompleted} Topics Completed</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="text-4xl font-extrabold text-primary">${h.focusScore}%</div>
+            ${h.topics && h.topics.filter(t => t.completed).length > 0 ? `<div class="bg-slate-800 p-2 rounded-lg group-hover:bg-slate-700 transition-colors"><i data-lucide="chevron-down" class="text-slate-400 w-5 h-5"></i></div>` : ''}
+          </div>
         </div>
-        <div class="text-4xl font-extrabold text-primary">${h.focusScore}%</div>
+        ${topicsHtml}
       </div>
     `;
   });
-  state.history.reverse();
   
+  createIcons({ icons });
+
   const statsContainer = document.getElementById('stats-container');
   const totalLife = state.history.reduce((a, b) => a + b.totalCompleted, 0) + state.topics.filter(t=>t.completed).length;
   statsContainer.innerHTML = `
@@ -635,7 +676,10 @@ function archiveWeek() {
   state.history.push({
     startDate: state.startDate,
     focusScore: pct,
-    totalCompleted: comp
+    totalCompleted: comp,
+    topics: JSON.parse(JSON.stringify(state.topics)),
+    subjects: JSON.parse(JSON.stringify(state.subjects)),
+    dailyNotes: JSON.parse(JSON.stringify(state.dailyNotes))
   });
   
   state.topics = [];
